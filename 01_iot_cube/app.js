@@ -11,7 +11,7 @@ var io          = require('socket.io').listen(server);
 
 NodeApp.use(express.static(__dirname + '/public'));
 
-var sp = new SerialPort("/dev/tty.usbmodem1431", {
+var sp = new SerialPort("/dev/tty.usbmodem1411", {
   parser: serialport.parsers.readline("\n"),
   baudrate: 9600
 });
