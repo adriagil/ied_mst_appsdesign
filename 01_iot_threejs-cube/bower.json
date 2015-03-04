@@ -1,0 +1,13 @@
+{
+  "name": "01-iot-threejs-cube",
+  "version": "0.0.1",
+  "authors": [
+    "Adrià Gil"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "socket.io-client": "~0.9.16",
+    "components-threejs": "master",
+    "threex.videotexture": "master"
+  }
+}
