@@ -1,0 +1,11 @@
+{
+  "name": "03-iot-browser-sensor",
+  "version": "0.0.1",
+  "authors": [
+    "Adrià Gil"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^2.1.3"
+  }
+}

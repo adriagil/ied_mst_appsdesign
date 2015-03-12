@@ -1,0 +1,11 @@
+{
+  "name": "03-iot-browser-sensor",
+  "version": "0.0.1",
+  "description": "IED class exercice",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.1.0"
+  },
+  "author": "Adrià Gil",
+  "license": "ISC"
+}

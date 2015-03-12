@@ -1,0 +1,28 @@
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.left, .right {
+  background-color: #bfbfbf;
+  float: left;
+  width: 46%;
+  margin-right: 20px;
+  padding: 10px;
+}
+
+.right {
+  margin: 0;
+}
+
+.current {
+  background-color: #e0e0e0;
+  padding: 3px;
+}
+
+.history {
+  background-color: #efefef;
+  width: 100%;
+  height: 350px;
+  overflow: scroll;
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Browser sensor API</title>
+
+    <link rel="stylesheet" type="text/css" href="styles.css">
+  </head>
+
+  <body>
+    <h3>JS device motion & orientation apis</h3>
+
+    <!-- Controls -->
+    <button id="start" disabled>START</button>
+    <button id="stop" disabled>STOP</button>
+    <div style="clear: both; margin-bottom: 10px;"></div>
+
+    <!-- Device Orientation -->
+    <div class="left">
+      <div id="orientation_z">
+        <h5>Z angle</h5>
+        <p class="current">waiting...</p>
+        <div class="history"></div>
+      </div>
+      <div id="orientation_x">
+        <h5>X angle</h5>
+        <p class="current">waiting...</p>
+        <div class="history"></div>
+      </div>
+      <div id="orientation_y">
+        <h5>Y angle</h5>
+        <p class="current">waiting...</p>
+        <div class="history"></div>
+      </div>
+    </div>
+
+    <!-- Device Motion -->
+    <div class="right">
+      <div id="motion_x">
+        <h5>X acceleration</h5>
+        <div class="current">waiting...</div>
+        <div class="history"></div>
+      </div>
+      <div id="motion_y">
+        <h5>Y acceleration</h5>
+        <div class="current">waiting...</div>
+        <div class="history"></div>
+      </div>
+      <div id="motion_z">
+        <h5>Z acceleration</h5>
+        <div class="current">waiting...</div>
+        <div class="history"></div>
+      </div>
+    </div>
+
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+    <script type="text/javascript">
+      /****************************************************************************************************
+      * For more information and considerations when using device orientation and motion apis please read:
+      * http://www.html5rocks.com/en/tutorials/device/orientation/
+      *****************************************************************************************************/
+
+      $(document).ready(function(){
+        $("#start").on("click", function(){
+          start();
+        });
+        $("#stop").on("click", function(){
+          stop();
+        });
+
+        $("#start").removeAttr("disabled");
+        $("#stop").removeAttr("disabled");
+      });
+
+      function processOrientationData(event) {
+        /**********************************
+        * event data available to collect:
+        * event.alpha
+        * event.beta
+        * event.gamma
+        * event.absolute
+        ***********************************/
+
+        var z = event.alpha;
+        var x = event.beta;
+        var y = event.gamma;
+
+        $("#orientation_z .current").html(z);
+        $("#orientation_x .current").html(x);
+        $("#orientation_y .current").html(y);
+
+        $("#orientation_z .history").append(z + "<br />");
+        $("#orientation_x .history").append(x + "<br />");
+        $("#orientation_y .history").append(y + "<br />");
+      }
+
+      function processMotionData(event) {
+        /**************************************************************
+        * event data available to collect:
+        * event.acceleration.x || event.accelerationIncludingGravity.x
+        * event.acceleration.y || event.accelerationIncludingGravity.y
+        * event.acceleration.z || event.accelerationIncludingGravity.z
+        * event.rotationRate.alpha
+        * event.rotationRate.beta
+        * event.rotationRate.gamma
+        ***************************************************************/
+
+        var x = event.accelerationIncludingGravity.x;
+        var y = event.accelerationIncludingGravity.y;
+        var z = event.accelerationIncludingGravity.z;
+
+        $("#motion_x .current").html(x);
+        $("#motion_y .current").html(y);
+        $("#motion_z .current").html(z);
+
+        $("#motion_x .history").append(x + "<br />");
+        $("#motion_y .history").append(y + "<br />");
+        $("#motion_z .history").append(z + "<br />");
+      }
+
+      function start() {
+        // Device Orientation: tilt angle sent by the accelerometer
+        // http://w3c.github.io/deviceorientation/spec-source-orientation.html#deviceorientation
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener("deviceorientation", processOrientationData, false);
+        } else {
+          alert("The browser does not support device orientation api");
+        }
+
+        // Device Motion: acceleration in meters per second (m/s)
+        // http://w3c.github.io/deviceorientation/spec-source-orientation.html#devicemotion
+        if (window.DeviceMotionEvent) {
+          window.addEventListener("devicemotion", processMotionData, false);
+        } else {
+          alert("The browser does not support device motion api");
+        }
+      }
+
+      function stop() {
+        window.removeEventListener("deviceorientation", processOrientationData);
+        window.removeEventListener("devicemotion", processMotionData);
+      }
+    </script>
+  </body>
+</html>
