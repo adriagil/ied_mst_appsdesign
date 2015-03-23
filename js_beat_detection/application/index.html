@@ -1,0 +1,186 @@
+<html>
+  <head>
+    <title>JS bpm detection</title>
+
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 11px;
+      }
+
+      #controls {
+        float: right;
+      }
+
+      .candidate {
+        width: 100%;
+        float: left;
+      }
+
+      .candidate-item-tempo,
+      .candidate-item-count {
+        font-weight: bold;
+        color: #000;
+        margin: 0px 10px;
+        padding: 5px;
+        display: block;
+        float: left;
+      }
+
+      .candidate-item-tempo {
+        width: 150px;
+      }
+
+      .candidate-item-count {
+        background: #000;
+        color: #fff;
+        min-width: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="controls">
+      <label for="threshold">lowpass filter threshold (dB):</label>
+      <input id="threshold" type="text" value="0.5"></input>
+      <br /><br />
+      <label for="steps">lowpass filter steps:</label>
+      <input id="steps" type="text" value="7" disabled></input>
+      <br /><br />
+      <button id="run-bpm-detect" onclick="runBpmDetect()" disabled>Run bpm detection</button>
+      <button id="draw-bpm-detect" onclick="drawBpmDetect()" disabled>Draw bpm detection resutls</button>
+      <button id="play" onclick="play()" disabled>play the file!</button>
+    </div>
+    <div id="detect-results"></div>
+
+    <script type="text/javascript" src="scripts/bpm.js"></script>
+    <script type="text/javascript" src="scripts/buffer-loader.js"></script>
+    <script>
+      window.onload = init;
+
+      var context;
+      var offlineContext
+      var bufferLoader;
+      var source;
+      var peaks;
+      var peakIntervals;
+      var tempoCounts;
+      var stepsCount;
+
+      function init() {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        context = new AudioContext();
+
+        bufferLoader = new BufferLoader(
+          context,
+          [
+            'sounds/120_sound-of-violence.mp3'
+          ],
+            finishedLoading
+          );
+
+        bufferLoader.load();
+      }
+
+      function play() {
+        source.start(0);
+      }
+
+      function finishedLoading(bufferList) {
+        console.log("finished loading the song");
+
+        source = context.createBufferSource();
+        source.buffer = bufferList[0];
+        source.connect(context.destination);
+
+        stepsCount = parseInt(document.getElementById("steps").value);
+
+        document.getElementById("run-bpm-detect").removeAttribute("disabled");
+        document.getElementById("play").removeAttribute("disabled");
+      }
+
+      function runBpmDetect() {
+        console.log("performing detecion step = ", stepsCount);
+
+        performDetectStep();
+      }
+
+      function performDetectStep() {
+        console.log("> starting bpm detection");
+
+        document.getElementById("draw-bpm-detect").setAttribute("disabled", "disabled");
+
+        // Create offline context for filtering
+        offlineContext = new OfflineAudioContext(1, source.buffer.length, source.buffer.sampleRate);
+
+        // Process the song with a Low Pass Filter
+        processLPF(offlineContext, source.buffer);
+
+        // The result of filtering
+        offlineContext.oncomplete = function(e) {
+          console.log("finished filtering");
+
+          if (stepsCount > 0) {
+            stepsCount--;
+            runBpmDetect();
+          } else {
+            source.buffer = e.renderedBuffer;
+            var channelData = source.buffer.getChannelData(0);
+
+            // Identify peaks in the filtered song
+            var threshold = document.getElementById("threshold").value;
+            peaks = getPeaksAtThreshold(channelData, threshold);
+
+            console.log("finished processing peaks");
+
+            peakIntervals = countIntervalsBetweenNearbyPeaks(peaks);
+
+            console.log("finished finding interval peaks");
+
+            tempoCounts = groupNeighborsByTempo(peakIntervals);
+
+            console.log("finished grouping interval peaks");
+
+            console.log("> finished bpm detection");
+
+            document.getElementById("draw-bpm-detect").removeAttribute("disabled");
+          }
+        }
+      }
+
+      function drawBpmDetect() {
+        results = document.getElementById("detect-results");
+        results.innerHTML = "";
+
+        if (tempoCounts.length <= 0) {
+          var candidate = document.createElement("div");
+          candidate.className = "candidate";
+          candidate.innerHTML = "no canidate for bpm found!";
+          results.appendChild(candidate);
+
+          return false;
+        }
+
+
+        tempoCounts.forEach(function(tempoCount, index){
+          var candidate = document.createElement("div");
+          candidate.id = "candidate-" + index;
+          candidate.className = "candidate";
+
+          var item_tempo = document.createElement("span");
+          item_tempo.className = "candidate-item-tempo";
+          item_tempo.innerHTML = tempoCount.tempo;
+          candidate.appendChild(item_tempo)
+
+          var item_count = document.createElement("span");
+          item_count.className = "candidate-item-count";
+          item_count.innerHTML = tempoCount.count;
+          item_count.style.width = (tempoCount.count / 100) + "%";
+          candidate.appendChild(item_count);
+
+          results.appendChild(candidate);
+        })
+      }
+    </script>
+  </body>
+</html>
