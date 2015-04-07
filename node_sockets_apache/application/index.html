@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Socket.io and Apache</title>
+  </head>
+
+  <body>
+    <h1>Testing out things...</h1>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+
+    <script>
+      var socket = io.connect('http://localhost');
+      socket.on('connected', function() {
+        console.log("connected");
+      })
+    </script>
+  </body>
+</html>

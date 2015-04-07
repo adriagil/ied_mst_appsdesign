@@ -1,185 +1,77 @@
 <html>
   <head>
-    <title>JS bpm detection</title>
+    <title>BPM detection with JS</title>
 
-    <style>
-      body {
-        font-family: sans-serif;
-        font-size: 11px;
-      }
-
-      #controls {
-        float: right;
-      }
-
-      .candidate {
-        width: 100%;
-        float: left;
-      }
-
-      .candidate-item-tempo,
-      .candidate-item-count {
-        font-weight: bold;
-        color: #000;
-        margin: 0px 10px;
-        padding: 5px;
-        display: block;
-        float: left;
-      }
-
-      .candidate-item-tempo {
-        width: 150px;
-      }
-
-      .candidate-item-count {
-        background: #000;
-        color: #fff;
-        min-width: 10px;
-      }
-    </style>
+    <script type="text/javascript" src="scripts/fft.js"></script>
+    <script type="text/javascript" src="scripts/beatdetect.js"></script>
   </head>
 
   <body>
-    <div id="controls">
-      <label for="threshold">lowpass filter threshold (dB):</label>
-      <input id="threshold" type="text" value="0.5"></input>
-      <br /><br />
-      <label for="steps">lowpass filter steps:</label>
-      <input id="steps" type="text" value="7" disabled></input>
-      <br /><br />
-      <button id="run-bpm-detect" onclick="runBpmDetect()" disabled>Run bpm detection</button>
-      <button id="draw-bpm-detect" onclick="drawBpmDetect()" disabled>Draw bpm detection resutls</button>
-      <button id="play" onclick="play()" disabled>play the file!</button>
-    </div>
-    <div id="detect-results"></div>
+    <button onclick="getData()">load song</button>
+    <button onclick="start()">start</button>
+    <button onclick="stop()">stop</button>
 
-    <script type="text/javascript" src="scripts/bpm.js"></script>
-    <script type="text/javascript" src="scripts/buffer-loader.js"></script>
     <script>
-      window.onload = init;
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      var audioContext = new AudioContext();
+      var sampleRate = audioContext.sampleRate;
+      var source = audioContext.createBufferSource();
 
-      var context;
-      var offlineContext
-      var bufferLoader;
-      var source;
-      var peaks;
-      var peakIntervals;
-      var tempoCounts;
-      var stepsCount;
+      // if you create an analyser node with fft size of 2048, your bin count
+      // will be half that when you get the bin count (1024)
+      var analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
 
-      function init() {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        context = new AudioContext();
+      var beatdetect = new FFT.BeatDetect(analyser.frequencyBinCount, sampleRate);
 
-        bufferLoader = new BufferLoader(
-          context,
-          [
-            'sounds/120_sound-of-violence.mp3'
-          ],
-            finishedLoading
-          );
+      // then inside your onaudioprocess loop you need to grab the
+      // float time domain data, as opposed to most libs that use
+      // byte freq data or float freq data
+      var javascriptNode = audioContext.createScriptProcessor(1024, 1, 1);
+      javascriptNode.onaudioprocess = function(audioProcessingEvent) {
+        var floats = new Float32Array(analyser.frequencyBinCount);
+        //var floats = new Float32Array(audioProcessingEvent.inputBuffer.getChannelData(0));
+        analyser.getFloatTimeDomainData(floats);
 
-        bufferLoader.load();
+        beatdetect.detect(floats);
+
+        if(beatdetect.isKick()) console.log("isKick()");
+        if(beatdetect.isSnare()) console.log("isSnare()");
       }
 
-      function play() {
+      function getData() {
+        request = new XMLHttpRequest();
+        request.open('GET', 'sounds/118_baby-im-yours.mp3', true);
+        request.responseType = 'arraybuffer';
+        request.onload = function() {
+          console.log("audio file loaded");
+
+          var audioData = request.response;
+
+          audioContext.decodeAudioData(audioData, function(buffer) {
+            console.log("decoding audio data, ", buffer);
+
+            myBuffer = buffer;
+            source.buffer = myBuffer;
+          }, function(e) {
+            console.log("error with decoding audio data, ", e.err);
+          });
+        }
+        request.send();
+      }
+
+      function start() {
+        source.connect(javascriptNode);
+        source.connect(analyser);
+
+        javascriptNode.connect(audioContext.destination);
+        analyser.connect(audioContext.destination);
+
         source.start(0);
       }
 
-      function finishedLoading(bufferList) {
-        console.log("finished loading the song");
-
-        source = context.createBufferSource();
-        source.buffer = bufferList[0];
-        source.connect(context.destination);
-
-        stepsCount = parseInt(document.getElementById("steps").value);
-
-        document.getElementById("run-bpm-detect").removeAttribute("disabled");
-        document.getElementById("play").removeAttribute("disabled");
-      }
-
-      function runBpmDetect() {
-        console.log("performing detecion step = ", stepsCount);
-
-        performDetectStep();
-      }
-
-      function performDetectStep() {
-        console.log("> starting bpm detection");
-
-        document.getElementById("draw-bpm-detect").setAttribute("disabled", "disabled");
-
-        // Create offline context for filtering
-        offlineContext = new OfflineAudioContext(1, source.buffer.length, source.buffer.sampleRate);
-
-        // Process the song with a Low Pass Filter
-        processLPF(offlineContext, source.buffer);
-
-        // The result of filtering
-        offlineContext.oncomplete = function(e) {
-          console.log("finished filtering");
-
-          if (stepsCount > 0) {
-            stepsCount--;
-            runBpmDetect();
-          } else {
-            source.buffer = e.renderedBuffer;
-            var channelData = source.buffer.getChannelData(0);
-
-            // Identify peaks in the filtered song
-            var threshold = document.getElementById("threshold").value;
-            peaks = getPeaksAtThreshold(channelData, threshold);
-
-            console.log("finished processing peaks");
-
-            peakIntervals = countIntervalsBetweenNearbyPeaks(peaks);
-
-            console.log("finished finding interval peaks");
-
-            tempoCounts = groupNeighborsByTempo(peakIntervals);
-
-            console.log("finished grouping interval peaks");
-
-            console.log("> finished bpm detection");
-
-            document.getElementById("draw-bpm-detect").removeAttribute("disabled");
-          }
-        }
-      }
-
-      function drawBpmDetect() {
-        results = document.getElementById("detect-results");
-        results.innerHTML = "";
-
-        if (tempoCounts.length <= 0) {
-          var candidate = document.createElement("div");
-          candidate.className = "candidate";
-          candidate.innerHTML = "no canidate for bpm found!";
-          results.appendChild(candidate);
-
-          return false;
-        }
-
-
-        tempoCounts.forEach(function(tempoCount, index){
-          var candidate = document.createElement("div");
-          candidate.id = "candidate-" + index;
-          candidate.className = "candidate";
-
-          var item_tempo = document.createElement("span");
-          item_tempo.className = "candidate-item-tempo";
-          item_tempo.innerHTML = tempoCount.tempo;
-          candidate.appendChild(item_tempo)
-
-          var item_count = document.createElement("span");
-          item_count.className = "candidate-item-count";
-          item_count.innerHTML = tempoCount.count;
-          item_count.style.width = (tempoCount.count / 100) + "%";
-          candidate.appendChild(item_count);
-
-          results.appendChild(candidate);
-        })
+      function stop() {
+        source.stop();
       }
     </script>
   </body>

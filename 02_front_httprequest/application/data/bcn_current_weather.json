@@ -1,0 +1,41 @@
+{
+    "coord": {
+        "lon": 2.16,
+        "lat": 41.39
+    },
+    "sys": {
+        "type": 3,
+        "id": 8549,
+        "message": 0.0141,
+        "country": "ES",
+        "sunrise": 1427434939,
+        "sunset": 1427479861
+    },
+    "weather": [
+        {
+            "id": 800,
+            "main": "Clear",
+            "description": "Sky is Clear",
+            "icon": "01n"
+        }
+    ],
+    "base": "stations",
+    "main": {
+        "temp": 286.86,
+        "pressure": 1021,
+        "temp_min": 284.26,
+        "temp_max": 288.55,
+        "humidity": 93
+    },
+    "wind": {
+        "speed": 1.35,
+        "deg": 198
+    },
+    "clouds": {
+        "all": 0
+    },
+    "dt": 1427483313,
+    "id": 3128760,
+    "name": "Barcelona",
+    "cod": 200
+}

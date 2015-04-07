@@ -1,0 +1,33 @@
+body {
+  font-family: sans-serif;
+  font-size: 11px;
+}
+
+#controls {
+  float: right;
+}
+
+.candidate {
+  width: 100%;
+  float: left;
+}
+
+.candidate-item-tempo,
+.candidate-item-count {
+  font-weight: bold;
+  color: #000;
+  margin: 0px 10px;
+  padding: 5px;
+  display: block;
+  float: left;
+}
+
+.candidate-item-tempo {
+  width: 150px;
+}
+
+.candidate-item-count {
+  background: #000;
+  color: #fff;
+  min-width: 10px;
+}
