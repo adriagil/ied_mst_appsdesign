@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!--meta http-equiv="X-UA-Compatible" content="IE=edge"-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>My First App</title>
+
+    <link rel="stylesheet" href="css/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="css/bootstrap-theme.css" media="screen">
+    <style>
+      body {
+        background-color: blue
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-4">
+          <input id="result" type="text" value="0.00" style="width: 100%" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-1">
+          <button>7</button>
+        </div>
+        <div class="col-sm-1">
+          <button>8</button>
+        </div>
+        <div class="col-sm-1">
+          <button>9</button>
+        </div>
+        <div class="col-sm-1">
+          <button>/</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-1">
+          <button>4</button>
+        </div>
+        <div class="col-sm-1">
+          <button>5</button>
+        </div>
+        <div class="col-sm-1">
+          <button>6</button>
+        </div>
+        <div class="col-sm-1">
+          <button>*</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1">
+          <button>1</button>
+        </div>
+        <div class="col-sm-1">
+          <button>2</button>
+        </div>
+        <div class="col-sm-1">
+          <button>3</button>
+        </div>
+        <div class="col-sm-1">
+          <button>-</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-1">
+          <button>0</button>
+        </div>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-1">
+          <button>+</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/jquery-1.11.2.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script>
+      var operator1;
+      var operator2;
+      var operand;
+
+      // CODE SNIPPET - use everytime you want to work with jQuery
+      $(document).ready(function(){
+        // jQuery selectors
+        $("#idName"); //id selector that must be unique
+        $(".className"); //class selector
+
+        // jQuery events
+        $("button").on("click", function(){
+          document.getElementById("result").value = $(this).text();
+          $("#result").attr("value", $(this).text());
+        });
+      });
+    </script>
+
+    <!--button onclick="getWeatherData()">get data</button>
+
+    <script type="text/javascript">
+      var serverResponse;
+
+      function getWeatherData() {
+        var weatherData = new XMLHttpRequest();
+
+        weatherData.open('GET', 'http://api.openweathermap.org/data/2.5/weather?q=Barcelona,es', true);
+        weatherData.responseType = 'json';
+        weatherData.onload = function() {
+          serverResponse = weatherData.response;
+          console.log(weatherData.response.weather[0].description)
+        }
+        weatherData.send();
+      }
+    </script-->
+  </body>
+</html>
