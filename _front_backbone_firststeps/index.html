@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Backbone from 0 to 100</title>
+  </head>
+  <body>
+    <button id="addItem">add an item please</button>
+
+    <script src="app/scripts/vendor/jquery-1.11.2.min.js"></script>
+    <script src="app/scripts/vendor/underscore.min.js"></script>
+    <script src="app/scripts/vendor/backbone.min.js"></script>
+
+    <script type="text/javascript">
+      (function($){
+
+        //var ListView = Backbone.View.extend({
+        var ListView = Backbone.View.extend({
+          // Backbone
+          el: $('body'),
+
+          events: {
+            "click #addItem": "addOneItem"
+          },
+
+          initialize: function() {
+            _.bindAll(this, 'render', 'addOneItem');
+
+            this.render();
+          },
+
+          render: function() {
+            $(this.el).append("<h1>Hellow world, " + this.getUsername() + "</h1>");
+          },
+
+          // Mine
+          getUsername: function() {
+            return "John Doe";
+          },
+
+          addOneItem: function() {
+            $(this.el).append("<h3>one item was added</h3>");
+          }
+
+        });
+
+        var listView1 = new ListView();
+        //var listView2 = new ListView();
+
+      })(jQuery);
+    </script>
+  </body>
+</html>

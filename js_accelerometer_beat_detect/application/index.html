@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Browser sensor API + BeatDetection</title>
+  </head>
+
+  <body>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script type="text/javascript">
+      var acc, pAcc;
+      acc = [0, 0, 0]
+      pAcc = [0, 0, 0]
+
+      function processMotionData(event) {
+        /**************************************************************
+        * event data available to collect:
+        * event.acceleration.x || event.accelerationIncludingGravity.x
+        * event.acceleration.y || event.accelerationIncludingGravity.y
+        * event.acceleration.z || event.accelerationIncludingGravity.z
+        * event.rotationRate.alpha
+        * event.rotationRate.beta
+        * event.rotationRate.gamma
+        ***************************************************************/
+
+        acc[0] = event.accelerationIncludingGravity.x;
+        acc[1] = event.accelerationIncludingGravity.y;
+        acc[2] = event.accelerationIncludingGravity.z;
+
+        console.log("x = " + acc[0] + ", y = " + acc[1] + " , z = "+ acc[2])
+      }
+
+      setInterval(function() {
+
+         var period;
+
+
+
+      }, 250);
+
+      // Device Motion: acceleration in meters per second (m/s)
+      // http://w3c.github.io/deviceorientation/spec-source-orientation.html#devicemotion
+      if (window.DeviceMotionEvent) {
+        window.addEventListener("devicemotion", processMotionData, false);
+      } else {
+        alert("The browser does not support device motion api");
+      }
+    </script>
+  </body>
+</html>
