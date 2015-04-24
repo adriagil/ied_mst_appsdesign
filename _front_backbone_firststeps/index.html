@@ -5,7 +5,15 @@
     <title>Backbone from 0 to 100</title>
   </head>
   <body>
-    <button id="addItem">add an item please</button>
+    <form id="addPlantForm">
+      <input id="common_name" type="text" value="" placeholder="common name">
+      <input id="generic_name" type="text" value="" placeholder="generic name">
+      <input id="latitude" type="text" value="" placeholder="latitude">
+      <input id="longitude" type="text" value="" placeholder="longitude">
+      <input id="picture" type="text" value="" placeholder="picture">
+    </form>
+    <button id="addNewPlant">add an item please</button>
+    <button id="resetAddPlantForm" type="reset">reset the form</button>
 
     <script src="app/scripts/vendor/jquery-1.11.2.min.js"></script>
     <script src="app/scripts/vendor/underscore.min.js"></script>
@@ -14,38 +22,55 @@
     <script type="text/javascript">
       (function($){
 
-        //var ListView = Backbone.View.extend({
-        var ListView = Backbone.View.extend({
+        var PlantModel = Backbone.Model.extend({
+          defaults: {
+            common_name: "",
+            generic_name: "",
+            latitude: 0,
+            longitude: 0,
+            picture: ""
+          }
+        });
+
+        var PlantView = Backbone.View.extend({
           // Backbone
           el: $('body'),
 
           events: {
-            "click #addItem": "addOneItem"
+            "click #addNewPlant": "addNewPlant"
           },
 
           initialize: function() {
-            _.bindAll(this, 'render', 'addOneItem');
+            _.bindAll(this, 'render', 'addOnePlant', 'addNewPlant');
 
             this.render();
           },
 
           render: function() {
-            $(this.el).append("<h1>Hellow world, " + this.getUsername() + "</h1>");
+            $(this.el).append("<h1>Welcome to the plants directory</h1>");
           },
 
-          // Mine
-          getUsername: function() {
-            return "John Doe";
+          addOnePlant: function(plant) {
+            console.log(plant);
+
+            $(this.el).append("<h3>Added a plant: " + plant.get("generic_name") + "</h3>");
           },
 
-          addOneItem: function() {
-            $(this.el).append("<h3>one item was added</h3>");
+          addNewPlant: function() {
+            var plant = new PlantModel();
+
+            plant.set("common_name", $("#common_name").val());
+            plant.set("generic_name", $("#generic_name").val());
+            plant.set("latitude", $("#latitude").val());
+            plant.set("longitude", $("#longitude").val());
+            plant.set("picture", $("#picture").val());
+
+            this.addOnePlant(plant);
           }
 
         });
 
-        var listView1 = new ListView();
-        //var listView2 = new ListView();
+        var plantView1 = new PlantView();
 
       })(jQuery);
     </script>
